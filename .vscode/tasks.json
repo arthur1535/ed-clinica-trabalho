@@ -1,0 +1,171 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compilar_clinica",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "clinica.c",
+                "fila.c",
+                "pilha.c",
+                "lista_circular.c",
+                "lista_com_cabeca.c",
+                "-o",
+                "clinica.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/fila_pilha"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Executar Clinica no Terminal",
+            "type": "shell",
+            "command": ".\\clinica.exe",
+            "options": {
+                "cwd": "${workspaceFolder}/fila_pilha"
+            },
+            "dependsOn": "compilar_clinica",
+            "problemMatcher": [],
+            "presentation": {
+                "focus": true,
+                "panel": "shared",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "compilar_aula02",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "-O0",
+                "lista_circular.c",
+                "main.c",
+                "-o",
+                "main.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/lista_circular_aula"
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Executar Lista Circular Aula 02",
+            "type": "shell",
+            "command": ".\\main.exe",
+            "options": {
+                "cwd": "${workspaceFolder}/lista_circular_aula"
+            },
+            "dependsOn": "compilar_aula02",
+            "problemMatcher": [],
+            "presentation": {
+                "focus": true,
+                "panel": "shared",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "compilar_exemplo_fila",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "exemplo_fila.c",
+                "fila.c",
+                "lista_circular.c",
+                "-o",
+                "exemplo_fila.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/fila_pilha"
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "compilar_exemplo_pilha_vetor",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "exemplo_pilha_vetor.c",
+                "pilha_vetor.c",
+                "-o",
+                "exemplo_pilha_vetor.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/fila_pilha"
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "compilar_exemplo_pilha_encadeada",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "exemplo_pilha_encadeada.c",
+                "pilha.c",
+                "lista_com_cabeca.c",
+                "-o",
+                "exemplo_pilha_encadeada.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/fila_pilha"
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "compilar_exemplo_lista_circular",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "exemplo_lista_circular.c",
+                "lista_circular.c",
+                "-o",
+                "exemplo_lista_circular.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/listas_encadeadas"
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "compilar_exemplo_lista_dupla",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "exemplo_lista_dupla.c",
+                "lista_dupla.c",
+                "-o",
+                "exemplo_lista_dupla.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/listas_encadeadas"
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}

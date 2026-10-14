@@ -1,0 +1,152 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "▶️ Executar / Depurar Clínica (Clinica VidaSaudavel)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/fila_pilha/clinica.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/fila_pilha",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "preLaunchTask": "compilar_clinica",
+            "setupCommands": [
+                {
+                    "description": "Habilitar formatação elegante para GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "▶️ Executar / Depurar Lista Circular (Aula 02)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/lista_circular_aula/main.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/lista_circular_aula",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "preLaunchTask": "compilar_aula02",
+            "setupCommands": [
+                {
+                    "description": "Habilitar formatação elegante para GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "▶️ Executar / Depurar Exemplo Fila",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/fila_pilha/exemplo_fila.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/fila_pilha",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "preLaunchTask": "compilar_exemplo_fila",
+            "setupCommands": [
+                {
+                    "description": "Habilitar formatação elegante para GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "▶️ Executar / Depurar Exemplo Pilha (Vetor)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/fila_pilha/exemplo_pilha_vetor.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/fila_pilha",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "preLaunchTask": "compilar_exemplo_pilha_vetor",
+            "setupCommands": [
+                {
+                    "description": "Habilitar formatação elegante para GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "▶️ Executar / Depurar Exemplo Pilha (Encadeada)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/fila_pilha/exemplo_pilha_encadeada.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/fila_pilha",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "preLaunchTask": "compilar_exemplo_pilha_encadeada",
+            "setupCommands": [
+                {
+                    "description": "Habilitar formatação elegante para GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "▶️ Executar / Depurar Exemplo Lista Dupla",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/listas_encadeadas/exemplo_lista_dupla.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/listas_encadeadas",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "preLaunchTask": "compilar_exemplo_lista_dupla",
+            "setupCommands": [
+                {
+                    "description": "Habilitar formatação elegante para GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "▶️ Executar / Depurar Exemplo Lista Circular (Professor)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/listas_encadeadas/exemplo_lista_circular.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/listas_encadeadas",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "preLaunchTask": "compilar_exemplo_lista_circular",
+            "setupCommands": [
+                {
+                    "description": "Habilitar formatação elegante para GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,584 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{geometry}
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows.meta,positioning,calc,fit}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=blue!70!black,
+    urlcolor=teal
+}
+
+% Configuracao de cores para codigo
+\definecolor{codegreen}{rgb}{0.13,0.55,0.13}
+\definecolor{codegray}{rgb}{0.45,0.45,0.45}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codeblue}{rgb}{0.0,0.2,0.7}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.99}
+
+\lstdefinestyle{cstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=7pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{black!20}
+}
+\lstset{style=cstyle}
+
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{destaquebox}[1]{
+    colback=blue!5!white,
+    colframe=blue!65!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=3mm,
+    boxrule=1pt,
+    breakable
+}
+
+\newtcolorbox{conceitobox}[1]{
+    colback=green!4!white,
+    colframe=green!50!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=3mm,
+    boxrule=1pt,
+    breakable
+}
+
+\begin{document}
+
+% -------------------------------------------------------------
+% CAPA / CABECALHO FORMAL
+% -------------------------------------------------------------
+\begin{center}
+    {\large \textbf{UNIVERSIDADE FEDERAL DE UBERLÂNDIA - UFU}}\\[0.2cm]
+    {\large \textbf{FACULDADE DE COMPUTAÇÃO - FACOM}}\\[0.2cm]
+    {\normalsize Disciplina: Estruturas de Dados | Professor(a): ED 2026}\\[1.5cm]
+
+    \rule{\linewidth}{1.5pt}\\[0.4cm]
+    {\LARGE \textbf{DOCUMENTAÇÃO TÉCNICA E CONCEITUAL}}\\[0.3cm]
+    {\Large \textbf{Sistema Clínico VidaSaudável: Integração das Quatro Estruturas Lineares Clássicas em C}}\\[0.4cm]
+    \rule{\linewidth}{1.5pt}\\[1.5cm]
+\end{center}
+
+\begin{abstract}
+Este documento apresenta uma análise conceitual, arquitetural e prática da implementação do sistema de atendimento hospitalar \textbf{Clínica VidaSaudável}, desenvolvido em linguagem C. O projeto atende integralmente aos requisitos curriculares de domínio das quatro estruturas de dados lineares clássicas: \textbf{Lista Simplesmente Encadeada com Cabeça} (cadastro de pacientes), \textbf{Lista Circular} (escala rotativa dos médicos), \textbf{Fila FIFO} (sala de espera) e \textbf{Pilha LIFO} (histórico de atendimentos reversível). São detalhados os conceitos de ponteiros simples e duplos, alocação dinâmica com gerenciamento rigoroso de memória, encapsulamento de Tipos Abstratos de Dados (TAD) e a mecânica interna de cada função implementada.
+\end{abstract}
+
+\vspace{0.8cm}
+\tableofcontents
+\newpage
+
+% -------------------------------------------------------------
+% SEÇÃO 1: OBJETIVOS E COMPETENCIAS
+% -------------------------------------------------------------
+\section{Objetivo Pedagógico e Competências Demonstradas}
+
+O objetivo central deste trabalho prático é demonstrar a capacidade de projetar, modularizar e integrar em um sistema interativo coeso as quatro estruturas de dados lineares clássicas em linguagem C.
+
+\begin{destaquebox}{Mapeamento dos Requisitos da Atividade}
+\begin{enumerate}
+    \item \textbf{Domínio de Ponteiros e Memória Dinâmica}:
+    \begin{itemize}
+        \item Uso de ponteiros simples (\texttt{T*}) para travessia, busca e leitura de estruturas.
+        \item Uso de ponteiros duplos (\texttt{T**}) para funções modificadoras onde o nó inicial ou a cabeça da coleção pode mudar na função chamadora.
+        \item Alocação explícita na Heap via \texttt{malloc(sizeof(...))} e liberação completa com \texttt{free()}, evitando vazamentos de memória (\textit{memory leaks}).
+    \end{itemize}
+    \item \textbf{Encapsulamento e Tipos Abstratos de Dados (TAD)}:
+    \begin{itemize}
+        \item Separação estrita entre interface (\texttt{.h}) e implementação (\texttt{.c}).
+        \item Composição de estruturas de alto nível (\texttt{Fila} e \texttt{Pilha}) aproveitando internamente as listas encadeadas sem expor seus nós para o código cliente.
+    \end{itemize}
+    \item \textbf{Comportamentos Lineares Distintos}:
+    \begin{itemize}
+        \item \textbf{FIFO (First-In, First-Out)}: Fila de espera na recepção médica.
+        \item \textbf{LIFO (Last-In, First-Out)}: Pilha para permitir a operação de ``Desfazer Atendimento'' (\textit{Undo}).
+        \item \textbf{Circular}: Escala contínua e cíclica de plantonistas.
+        \item \textbf{Linear com Sentinela/Cabeça}: Cadastro permanente de pacientes com busca e remoção arbitrária por ID.
+    \end{itemize}
+\end{enumerate}
+\end{destaquebox}
+
+% -------------------------------------------------------------
+% SEÇÃO 2: ARQUITETURA DA CLÍNICA VIDASAUDÁVEL
+% -------------------------------------------------------------
+\section{Contexto e Arquitetura da Clínica VidaSaudável}
+
+O sistema hospitalar \textbf{Clínica VidaSaudável} gerencia o fluxo de pacientes desde o acolhimento até a consulta com o médico plantonista, registrando auditoria reversível de eventos.
+
+\subsection{As Quatro Coleções Independentes}
+
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}p{3.2cm}p{3.3cm}p{2.8cm}p{3.2cm}c@{}}
+\toprule
+\textbf{Coleção / Módulo} & \textbf{Estrutura Subjacente} & \textbf{Disciplina} & \textbf{Papel no Sistema} & \textbf{Complexidade} \\ \midrule
+\textbf{Pacientes Cadastrados} & Lista Encadeada c/ Cabeça & Linear com Sentinela & Cadastro permanente com ID único & Busca: $O(n)$, Rem: $O(n)$ \\
+\textbf{Escala de Médicos} & Lista Circular Simples & Anel Cíclico & Plantonistas rotativos & Inserir/Avançar: $O(1)$ \\
+\textbf{Sala de Espera} & Fila (TAD Fila) & FIFO (Primeiro a Chegar) & Ordem de atendimento médico & Push/Pop: $O(1)$ \\
+\textbf{Histórico Atendimento} & Pilha (TAD Pilha) & LIFO (Último Atendido) & Desfazer o último atendimento & Push/Pop: $O(1)$ \\ \bottomrule
+\end{tabular}%
+}
+\caption{Quadro Comparativo das Coleções e Estruturas de Dados}
+\end{table}
+
+\subsection{Fluxo Típico de Atendimento}
+
+O diagrama abaixo ilustra o ciclo operacional completo entre as quatro estruturas:
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.8cm and 1.5cm, auto, >=Stealth]
+    % Nós
+    \node [rectangle, draw=blue!70, fill=blue!10, rounded corners, text width=3.2cm, align=center, minimum height=1.2cm] (cad) 
+        {\textbf{1. Cadastro}\\\small Lista c/ Cabeça\\\footnotesize(ID paciente permanente)};
+        
+    \node [rectangle, draw=teal!70, fill=teal!10, rounded corners, text width=3.2cm, align=center, minimum height=1.2cm, right=of cad] (fila) 
+        {\textbf{2. Sala de Espera}\\\small Fila FIFO\\\footnotesize(aguardando chamada)};
+
+    \node [rectangle, draw=orange!70, fill=orange!10, rounded corners, text width=3.2cm, align=center, minimum height=1.2cm, below=of fila] (atend) 
+        {\textbf{3. Consultório}\\\small Médico da Vez\\\footnotesize(Lista Circular avança)};
+
+    \node [rectangle, draw=purple!70, fill=purple!10, rounded corners, text width=3.2cm, align=center, minimum height=1.2cm, below=of cad] (pilha) 
+        {\textbf{4. Histórico}\\\small Pilha LIFO\\\footnotesize(topo = último atendido)};
+
+    % Arestas
+    \draw [->, thick] (cad) -- node [above] {\footnotesize \texttt{Opção 9: Enfileirar}} (fila);
+    \draw [->, thick] (fila) -- node [right] {\footnotesize \texttt{Opção 10: Atender}} (atend);
+    \draw [->, thick] (atend) -- node [below] {\footnotesize \texttt{Registra no Histórico}} (pilha);
+    \draw [->, dashed, thick, red!80!black] (pilha) -- node [left] {\footnotesize \texttt{Opção 11: Desfazer Atendimento}} (fila);
+\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+    \item \textbf{Cadastro}: Paciente é inserido no cadastro permanente (\texttt{Opção 1}).
+    \item \textbf{Enfileiramento}: O paciente cadastrado dá entrada na sala de espera (\texttt{Opção 9}).
+    \item \textbf{Atendimento}: O próximo da fila é chamado pelo médico plantonista da vez (\texttt{Opção 10}). O paciente é desenfileirado e empilhado no histórico; o médico plantonista da escala circular avança para o próximo da lista.
+    \item \textbf{Desfazer Atendimento}: Se o médico precisa cancelar ou corrigir o atendimento (\texttt{Opção 11}), o paciente no topo da pilha é desempilhado e devolvido à fila de espera.
+\end{enumerate}
+
+\newpage
+
+% -------------------------------------------------------------
+% SEÇÃO 3: DETALHAMENTO DE CADA ESTRUTURA
+% -------------------------------------------------------------
+\subsection{Resolução de Conflitos de Nomes e Engenharia dos Cabeçalhos (\texttt{.h})}
+
+Em linguagem C pura, não existem \textit{namespaces} (como em C++ ou C\#). Todas as funções globais e definições de \texttt{structs}/ \texttt{typedefs} compartilham um único espaço global de nomes. Quando múltiplos arquivos de cabeçalho definem tipos genéricos iguais (ex: \texttt{No}) ou funções com nomes idênticos (ex: \texttt{criar\_lista()}), a inclusão simultânea desses arquivos em um único programa integrador como \texttt{clinica.c} dispara erros fatais de redefinição no compilador GCC e colisão de símbolos no \textit{linker}.
+
+Para resolver esse problema e permitir que as quatro estruturas convivam harmonicamente no mesmo programa, realizamos uma refatoração arquitetural nos quatro arquivos de cabeçalho:
+
+\begin{enumerate}
+    \item \textbf{\texttt{lista\_com\_cabeca.h} (Lista para Pacientes e Pilha)}:
+    \begin{itemize}
+        \item O tipo da estrutura foi renomeado de \texttt{No} para \texttt{ListaNo}:
+\begin{lstlisting}[language=C]
+typedef struct no_lista {
+  int dado;
+  struct no_lista *prox;
+} ListaNo;
+\end{lstlisting}
+        \item As funções ganharam o prefixo exclusivo \texttt{lista\_}: \texttt{lista\_criar\_lista()}, \texttt{lista\_adicionar\_inicio()}, \texttt{lista\_buscar\_valor()}, \texttt{lista\_remover\_valor()}, \texttt{lista\_tamanho\_lista()}.
+    \end{itemize}
+
+    \item \textbf{\texttt{lista\_circular.h} (Lista para Médicos e Fila)}:
+    \begin{itemize}
+        \item O tipo da estrutura foi renomeado para \texttt{CircularNo}:
+\begin{lstlisting}[language=C]
+typedef struct no_circular {
+  int dado;
+  struct no_circular *prox;
+} CircularNo;
+\end{lstlisting}
+        \item Adicionou-se a função \texttt{avancar\_lista(CircularNo **L)}, fundamental para rotacionar a escala dos médicos plantonistas sem destruir nós.
+    \end{itemize}
+
+    \item \textbf{\texttt{fila.h} (Sala de Espera - FIFO)}:
+    \begin{itemize}
+        \item Declara explicitamente a composição interna usando a lista circular:
+\begin{lstlisting}[language=C]
+typedef struct {
+  int tam; 
+  CircularNo *L; // Composicao interna opaca
+} Fila;
+\end{lstlisting}
+        \item Expõe apenas a interface limpa do TAD: \texttt{fila\_adicionar()}, \texttt{fila\_topo()}, \texttt{fila\_remover()}, \texttt{fila\_tamanho()}.
+    \end{itemize}
+
+    \item \textbf{\texttt{pilha.h} (Histórico Reversível - LIFO)}:
+    \begin{itemize}
+        \item Declara explicitamente a composição interna usando a lista com cabeça:
+\begin{lstlisting}[language=C]
+typedef struct {
+  ListaNo *L; // Composicao interna opaca
+} Pilha;
+\end{lstlisting}
+        \item Expõe apenas a interface limpa do TAD: \texttt{pilha\_adicionar()}, \texttt{pilha\_topo()}, \texttt{pilha\_remover()}, \texttt{pilha\_tamanho()}.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Lista Encadeada Simples com Cabeça (\texttt{lista\_com\_cabeca.c/.h})}
+
+\subsubsection{Conceito do Nó Cabeça (Sentinela)}
+A lista utiliza um \textbf{nó cabeça} (ou nó sentinela) alocado na inicialização. Esse nó nunca contém dados de paciente; em vez disso:
+\begin{itemize}
+    \item \texttt{head->dado} armazena a \textbf{quantidade total de elementos} da lista ($O(1)$ para tamanho).
+    \item \texttt{head->prox} aponta para o primeiro elemento real, ou \texttt{NULL} se a lista estiver vazia.
+    \item \textbf{Vantagem técnica}: Elimina o caso especial de inserir ou remover no início. O nó anterior ao primeiro sempre existe: é o próprio nó cabeça!
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, node distance=1.2cm]
+    \node [draw, fill=gray!20, minimum height=0.8cm, minimum width=1.8cm] (head) {\small Cabeça: \texttt{dado=2}};
+    \node [draw, fill=blue!10, minimum height=0.8cm, minimum width=1.5cm, right=of head] (n1) {\small ID: 101};
+    \node [draw, fill=blue!10, minimum height=0.8cm, minimum width=1.5cm, right=of n1] (n2) {\small ID: 205};
+    \node [right=0.8cm of n2] (null) {\small \texttt{NULL}};
+
+    \draw [->, thick] (head) -- (n1);
+    \draw [->, thick] (n1) -- (n2);
+    \draw [->, thick] (n2) -- (null);
+\end{tikzpicture}
+\end{center}
+
+\subsubsection{Implementação das Funções Chave}
+
+\begin{lstlisting}[language=C, caption={{Criação e Inserção no Fim com Nó Cabeça}}]
+ListaNo* lista_criar_lista() {
+  ListaNo *q = (ListaNo*) malloc(sizeof(ListaNo));
+  q->dado = 0;    // Contador de tamanho
+  q->prox = NULL; // Nenhum paciente ainda
+  return q; 
+} 
+
+void lista_adicionar_final(ListaNo *p, int x) {
+  ListaNo *q, *aux;
+  q = (ListaNo*) malloc(sizeof(ListaNo));
+  q->dado = x;
+  q->prox = NULL;
+  
+  aux = p; // Comeca a partir do no cabeca
+  while (aux->prox != NULL) 
+    aux = aux->prox; // Caminha ate o ultimo no existente
+    
+  aux->prox = q; // Encadeia o novo no no fim
+  p->dado++;     // Incrementa o contador na cabeca
+}
+\end{lstlisting}
+
+\begin{conceitobox}{Por que passar \texttt{ListaNo *p} em vez de \texttt{ListaNo **p}?}
+Como o nó cabeça foi alocado na criação da lista e seu endereço na memória Heap \textbf{nunca se altera} durante a vida útil do cadastro, a função recebe apenas \texttt{ListaNo *p}. O ponteiro da cabeça permanece fixo; apenas o encadeamento dos campos internos (\texttt{aux->prox}) e o valor do contador (\texttt{p->dado}) são alterados.
+\end{conceitobox}
+
+\begin{lstlisting}[language=C, caption={{Remoção Segura por Valor}}]
+void lista_remover_valor(ListaNo *p, int v) {
+  ListaNo* q = p; // q e o predecessor do no a ser verificado
+  while (q->prox != NULL){
+    if(q->prox->dado == v) break;
+    q = q->prox;
+  }
+  if(q->prox == NULL) return; // Paciente nao encontrado
+  
+  ListaNo* tmp = q->prox;     // Guarda ponteiro do no a desalocar
+  q->prox = tmp->prox;        // 'Pula' o no a ser removido
+  free(tmp);                  // Libera a memoria da Heap
+  p->dado--;                  // Atualiza o contador na cabeca
+}
+\end{lstlisting}
+
+\newpage
+
+% -------------------------------------------------------------
+% SUBSEÇÃO 3.2: LISTA CIRCULAR
+% -------------------------------------------------------------
+\subsection{Lista Circular Simplesmente Encadeada (\texttt{lista\_circular.c/.h})}
+
+\subsubsection{Conceito do Ponteiro para a Cauda (\texttt{*p})}
+Diferente de uma lista linear onde o último nó aponta para \texttt{NULL}, na lista circular o último nó aponta de volta para o primeiro:
+\begin{equation}
+    \text{último}\to\text{prox} = \text{primeiro}
+\end{equation}
+
+A implementação adota a técnica mais eficiente da ciência da computação para listas circulares: \textbf{manter um único ponteiro para o último nó} (cauda \texttt{p}):
+\begin{itemize}
+    \item O último elemento é acessado em $O(1)$: \texttt{p}.
+    \item O primeiro elemento (o plantonista da vez) é acessado em $O(1)$: \texttt{p->prox}.
+    \item A rotação de plantão (\texttt{avancar\_lista}) é uma simples atribuição em tempo constante $O(1)$: \texttt{*p = (*p)->prox}!
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, node distance=1.5cm]
+    \node [draw, circle, fill=orange!20, minimum size=1.1cm] (m1) {\small Med 1};
+    \node [draw, circle, fill=orange!20, minimum size=1.1cm, right=1.8cm of m1] (m2) {\small Med 2};
+    \node [draw, circle, fill=orange!20, minimum size=1.1cm, below=1.2cm of $(m1)!0.5!(m2)$] (m3) {\small Med 3};
+
+    \draw [->, thick] (m1) to[bend left=25] (m2);
+    \draw [->, thick] (m2) to[bend left=25] (m3);
+    \draw [->, thick] (m3) to[bend left=25] (m1);
+
+    \node [below=0.4cm of m3, color=red!70!black] (ptr) {\textbf{*p (Cauda)}};
+    \draw [->, thick, red!70!black] (ptr) -- (m3);
+    
+    \node [above=0.4cm of m1, color=blue!70!black] (primeiro) {\textbf{p->prox (Plantonista da Vez)}};
+    \draw [->, thick, blue!70!black] (primeiro) -- (m1);
+\end{tikzpicture}
+\end{center}
+
+\subsubsection{Implementação das Funções da Lista Circular}
+
+\begin{lstlisting}[language=C, caption={{Avanço de Plantão e Inserção no Fim em $O(1)$}}]
+// Avanca o plantao da escala medica em tempo O(1)
+void avancar_lista(CircularNo **p) {
+  if (*p != NULL) 
+    *p = (*p)->prox; // A cauda vira o proximo no; o inicio vira o seguinte!
+}
+
+// Retorna o ID do medico plantonista da vez em O(1)
+int acessar_primeiro(CircularNo *p){
+  if(p == NULL) return -1; // Lista vazia
+  CircularNo *q = p->prox; // p->prox e sempre o primeiro no!
+  return q->dado;
+}
+
+// Insere novo medico no fim da escala
+void adicionar_final(CircularNo **p, int x) {
+  CircularNo *q = (CircularNo*) malloc(sizeof(CircularNo));
+  q->dado = x;
+  if(*p == NULL) { // Lista vazia: no aponta para si proprio
+    *p = q;
+    q->prox = q;
+  } else {
+    q->prox = (*p)->prox; // O novo no aponta para o primeiro no
+    (*p)->prox = q;        // A antiga cauda aponta para o novo no
+    *p = q;                // O ponteiro da cauda passa a ser o novo no!
+  }
+}
+\end{lstlisting}
+
+\begin{destaquebox}{Por que \texttt{CircularNo **p} (Ponteiro Duplo)?}
+Quando a lista circular está vazia, o ponteiro na função \texttt{main} vale \texttt{NULL}. Para que a função \texttt{adicionar\_final} altere o valor do ponteiro da \texttt{main}, ela precisa receber o \textbf{endereço daquele ponteiro} (\texttt{\&medicos}). O desreferenciamento \texttt{*p = q} atualiza a variável original na memória da \texttt{main}.
+\end{destaquebox}
+
+\newpage
+
+% -------------------------------------------------------------
+% SUBSEÇÃO 3.3: FILA FIFO
+% -------------------------------------------------------------
+\subsection{TAD Fila — FIFO (\texttt{fila.c/.h})}
+
+\subsubsection{Encapsulamento e Composição}
+O TAD \texttt{Fila} encapsula a complexidade dos nós encadeados. Seu tipo de dado exposto na interface é:
+\begin{lstlisting}[language=C]
+typedef struct {
+  int tam;          // Quantidade de pacientes na sala de espera
+  CircularNo *L;    // Lista circular interna usada como buffer FIFO
+} Fila;
+\end{lstlisting}
+
+\begin{conceitobox}{Vantagem Arquitetural da Fila sobre Lista Circular}
+Ao utilizar a lista circular internamente:
+\begin{itemize}
+    \item \textbf{Enfileirar (\texttt{fila\_adicionar})}: chama \texttt{adicionar\_final(\&L, x)} em $O(1)$.
+    \item \textbf{Espiar Primeiro (\texttt{fila\_topo})}: chama \texttt{acessar\_primeiro(L)} em $O(1)$.
+    \item \textbf{Desenfileirar (\texttt{fila\_remover})}: chama \texttt{remover\_inicio(\&L)} em $O(1)$.
+\end{itemize}
+Garante-se o comportamento estrito \textbf{FIFO} (Primeiro a Entrar, Primeiro a Sair) com todas as operações essenciais executadas em tempo constante $O(1)$ sem desperdício de memória!
+\end{conceitobox}
+
+\begin{lstlisting}[language=C, caption={{Operações da Fila FIFO}}]
+Fila* fila_criar() {
+  Fila *p = (Fila*) malloc(sizeof(Fila));
+  p->tam = 0;
+  p->L = criar_lista(); // Inicializa lista circular interna
+  return p; 
+}
+
+void fila_adicionar(Fila **p, int x) {
+  adicionar_final(&((*p)->L), x); // Entra no fim da fila
+  (*p)->tam++;
+}
+
+void fila_remover(Fila **p) {
+  if ((*p)->tam == 0) return;
+  remover_inicio(&((*p)->L));      // Sai do inicio da fila
+  (*p)->tam--;
+}
+
+int fila_topo(Fila *p) {
+  return acessar_primeiro(p->L);   // Proximo da fila a ser atendido
+}
+\end{lstlisting}
+
+% -------------------------------------------------------------
+% SUBSEÇÃO 3.4: PILHA LIFO
+% -------------------------------------------------------------
+\subsection{TAD Pilha — LIFO (\texttt{pilha.c/.h})}
+
+\subsubsection{Encapsulamento e Histórico Reversível}
+O TAD \texttt{Pilha} armazena o histórico dos atendimentos médicos realizados:
+\begin{lstlisting}[language=C]
+typedef struct {
+  ListaNo *L; // Lista encadeada com cabeca usada como buffer LIFO
+} Pilha;
+\end{lstlisting}
+
+O topo da pilha coincide com a primeira posição logo após o nó cabeça da lista encadeada (\texttt{L->prox}):
+\begin{itemize}
+    \item \textbf{Empilhar (\texttt{pilha\_adicionar})}: insere no início da lista via \texttt{lista\_adicionar\_inicio(p->L, x)} em $O(1)$.
+    \item \textbf{Topo (\texttt{pilha\_topo})}: consulta o primeiro nó via \texttt{lista\_acessar\_primeiro(p->L)} em $O(1)$.
+    \item \textbf{Desempilhar (\texttt{pilha\_remover})}: remove o primeiro nó via \texttt{lista\_remover\_inicio(p->L)} em $O(1)$.
+\end{itemize}
+
+O elemento inserido mais recentemente fica no topo. Quando o usuário executa a opção de ``Desfazer Atendimento'', a operação de desempilhar (\textit{pop}) devolve exatamente o último paciente consultado!
+
+\newpage
+
+% -------------------------------------------------------------
+% SEÇÃO 4: O PROGRAMA INTEGRADOR (clinica.c)
+% -------------------------------------------------------------
+\section{O Sistema Integrador (\texttt{clinica.c})}
+
+O arquivo \texttt{clinica.c} atua como o controlador da aplicação. Na função \texttt{main}, as quatro coleções são instanciadas independentemente:
+
+\begin{lstlisting}[language=C, caption={{Instanciação das Quatro Estruturas no main}}]
+int main(void) {
+  ListaNo *pacientes   = lista_criar_lista(); // 1. Cadastro permanente
+  CircularNo *medicos  = criar_lista();       // 2. Escala de plantao
+  Fila *espera         = fila_criar();        // 3. Sala de espera (FIFO)
+  Pilha *historico     = pilha_criar();       // 4. Historico (LIFO)
+  int opcao;
+  // ... loop interativo ...
+\end{lstlisting}
+
+\subsection{Análise das Operações de Integração}
+
+\subsubsection{Atendimento de Paciente (\texttt{Opção 10})}
+Esta é a operação mais rica do sistema, pois coordena simultaneamente três coleções distintas:
+
+\begin{lstlisting}[language=C, caption={{Coordenação entre Fila, Pilha e Lista Circular}}]
+case 10:
+  if (fila_tamanho(espera) == 0) 
+    printf("Sala de espera vazia.\n");
+  else if (tamanho_lista(medicos) == 0) 
+    printf("Nao ha medico de plantao.\n");
+  else {
+    int paciente = fila_topo(espera);         // 1. Identifica o proximo da fila
+    int medico   = acessar_primeiro(medicos);  // 2. Identifica o plantonista da vez
+    
+    fila_remover(&espera);                     // 3. Paciente SAI da sala de espera (FIFO)
+    pilha_adicionar(&historico, paciente);     // 4. Paciente ENTRA no historico (LIFO)
+    
+    printf("Paciente %d atendido pelo medico %d.\n", paciente, medico);
+    avancar_lista(&medicos);                   // 5. Escala circular avanca para o prox medico!
+  }
+  break;
+\end{lstlisting}
+
+\subsubsection{Desfazer Último Atendimento (\texttt{Opção 11})}
+Demonstra a utilidade prática da estrutura de Pilha (LIFO) para histórico reversível:
+
+\begin{lstlisting}[language=C, caption={{Reversão de Atendimento via Desempilhamento}}]
+case 11:
+  if (pilha_tamanho(historico) == 0) 
+    printf("Nao ha atendimento para desfazer.\n");
+  else {
+    int paciente = pilha_topo(historico);     // 1. Consulta o ultimo atendido
+    pilha_remover(&historico);                 // 2. Desempilha do historico
+    fila_adicionar(&espera, paciente);         // 3. Devolve paciente para a fila de espera!
+    printf("Atendimento do paciente %d desfeito; voltou para a fila.\n", paciente);
+  }
+  break;
+\end{lstlisting}
+
+\subsubsection{Encerramento Seguro e Liberação de Memória (\texttt{Opção 0})}
+Ao finalizar a aplicação, todas as quatro coleções são desalocadas recursiva ou iterativamente, garantindo vazamento zero de memória (\textit{Zero Memory Leaks}):
+
+\begin{lstlisting}[language=C, caption={{Desalocação Completa na Saída}}]
+  lista_destruir_lista(&pacientes);
+  destruir_lista(&medicos);
+  fila_destruir(&espera);
+  pilha_destruir(&historico);
+  return 0;
+\end{lstlisting}
+
+\newpage
+
+% -------------------------------------------------------------
+% SEÇÃO 5: RASTREAMENTO PASSO A PASSO (TRACE DE EXECUÇÃO)
+% -------------------------------------------------------------
+\section{Rastreamento Passo a Passo de um Cenário Real}
+
+A tabela a seguir demonstra a evolução das quatro estruturas de dados durante uma sequência de ações típica no terminal:
+
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}clcccc@{}}
+\toprule
+\textbf{Passo} & \textbf{Ação do Usuário} & \textbf{Cadastro (\texttt{ListaNo})} & \textbf{Médicos (\texttt{CircularNo})} & \textbf{Fila (\texttt{Fila})} & \textbf{Pilha (\texttt{Pilha})} \\ \midrule
+1 & Cadastrar pac. 101 e 102 & $[101, 102]$ & $\emptyset$ & $\emptyset$ & $\emptyset$ \\
+2 & Cadastrar méd. 1 e 2 & $[101, 102]$ & $[1 \circlearrowleft 2]$ & $\emptyset$ & $\emptyset$ \\
+3 & Colocar 101 na fila & $[101, 102]$ & $[1 \circlearrowleft 2]$ & $[101]$ & $\emptyset$ \\
+4 & Colocar 102 na fila & $[101, 102]$ & $[1 \circlearrowleft 2]$ & $[101, 102]$ & $\emptyset$ \\
+5 & \textbf{Atender paciente} & $[101, 102]$ & $[2 \circlearrowleft 1]$ (avançou!) & $[102]$ & $[\mathbf{101}]$ (topo) \\
+6 & \textbf{Atender paciente} & $[101, 102]$ & $[1 \circlearrowleft 2]$ (avançou!) & $\emptyset$ & $[\mathbf{102}, 101]$ \\
+7 & \textbf{Desfazer atendimento} & $[101, 102]$ & $[1 \circlearrowleft 2]$ & $[102]$ & $[\mathbf{101}]$ \\ \bottomrule
+\end{tabular}%
+}
+\caption{Trace de Estados da Memória durante o Fluxo Clínico}
+\end{table}
+
+\begin{destaquebox}{Observações do Rastreamento}
+\begin{itemize}
+    \item \textbf{No passo 5}: O paciente 101 é atendido pelo médico 1 (primeiro da escala). A fila passa a ter apenas o 102 (disciplina FIFO). A escala médica avança e o médico 2 assume o plantão da vez.
+    \item \textbf{No passo 6}: O paciente 102 é atendido pelo médico 2. A pilha recebe 102 no topo (ficando $[102, 101]$). A escala circular completa a volta e o médico 1 torna a ser o da vez.
+    \item \textbf{No passo 7}: Ao desfazer, o paciente 102 (que estava no topo da pilha por ter sido o último atendido) é retirado da pilha e recolocado na fila de espera. O histórico volta a conter apenas o paciente 101.
+\end{itemize}
+\end{destaquebox}
+
+% -------------------------------------------------------------
+% SEÇÃO 6: CONCLUSÃO
+% -------------------------------------------------------------
+\section{Conclusão}
+
+O projeto \textbf{Clínica VidaSaudável} cumpre integralmente os requisitos fundamentais da disciplina de Estruturas de Dados:
+\begin{enumerate}
+    \item \textbf{Domínio Algorítmico}: Aplicação das complexidades $O(1)$ nas operações de inserção/remoção em filas, pilhas e rotação de plantão circular.
+    \item \textbf{Engenharia de Software em C}: Alta modularidade, isolamento de TADs via arquivos de cabeçalho e ocultação da representação interna.
+    \item \textbf{Robustez Operacional}: Tratamento correto de entradas do usuário, prevenção de operações em coleções vazias e destruição completa dos nós dinâmicos da Heap.
+\end{enumerate}
+
+\end{document}
